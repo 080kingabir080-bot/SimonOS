@@ -185,29 +185,29 @@
                 padding: 20px;
             }
         }
-        /* קונטיינר שירותים לבן */
-.services-card {
+/* עיצוב הקונטיינר הלבן המרכזי */
+.services-card-main {
     background: #ffffff;
-    border-radius: var(--radius);
-    padding: 40px 20px;
-    margin: 20px auto;
-    max-width: 1100px;
-    box-shadow: var(--shadow);
-    text-align: center;
+    border-radius: 24px;
+    padding: 45px 25px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.03);
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .services-header h3 {
-    font-size: 1.8rem;
-    color: var(--text-main);
-    margin-bottom: 15px;
+    font-size: 1.6rem;
+    margin-bottom: 12px;
+    color: #1a1a1a;
 }
 
-/* קו לבן חי עם אנימציה איטית */
+/* הקו החי - אנימציה איטית ויוקרתית */
 .animated-line-container {
-    width: 150px;
-    height: 4px;
-    background: #eee; /* רקע הקו */
-    margin: 0 auto 30px;
+    width: 100px;
+    height: 3px;
+    background: #f0f0f0;
+    margin: 0 auto 35px;
     border-radius: 10px;
     position: relative;
     overflow: hidden;
@@ -215,13 +215,10 @@
 
 .white-live-line {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, #ffffff, transparent);
-    background-color: var(--accent-red); /* צבע הקו שזז */
-    animation: slowLine 4s linear infinite;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+    animation: slowLine 3.5s ease-in-out infinite;
 }
 
 @keyframes slowLine {
@@ -229,33 +226,36 @@
     100% { left: 100%; }
 }
 
-/* 5 סרטונים עגולים */
+/* גריד הסרטונים */
 .video-grid {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
 .video-circle {
-    width: 100px;
-    height: 100px;
+    width: 85px;
+    height: 85px;
     border-radius: 50%;
-    border: 3px solid var(--accent-red);
-    overflow: hidden;
+    border: 2px solid #eee;
+    padding: 3px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
-    transition: transform 0.3s ease;
-    background: #000;
+    background: #fff;
 }
 
 .video-circle:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
+    border-color: var(--accent-red);
+    box-shadow: 0 10px 20px rgba(230, 57, 70, 0.2);
 }
 
 .video-circle video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 50%;
 }
     </style>
 </head>
@@ -278,14 +278,12 @@
         </div>
     </nav>
 
-    <div id="screen-home" class="container">
-        <div class="card" style="text-align: center; padding: 60px 20px;">
-            <h1 style="font-size: 2.5rem; margin-bottom: 20px;">ברוכים הבאים ל-Build Simon</h1>
-            <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 30px;">סוכנות דיגיטל מתקדמת. אנחנו כאן כדי לבנות, לעצב ולנהל את הנוכחות הדיגיטלית שלך בצורה חכמה.</p>
-            <div style="display: flex; justify-content: center; gap: 15px;">
-                <button class="btn-primary" onclick="showScreen('services-web')">התחל פרויקט</button>
-                <div class="container">
-        <div class="services-card">
+<div id="screen-home" class="container">
+    <div class="card" style="text-align: center; padding: 40px 20px; border: none; background: transparent; box-shadow: none;">
+        <h1 style="font-size: 2.8rem; font-weight: 900; margin-bottom: 10px;">Build Simon</h1>
+        <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 40px;">סוכנות לפתרונות דיגיטל מתקדמים</p>
+
+        <div class="services-card-main">
             <div class="services-header">
                 <h3>השירותים שלנו</h3>
                 <div class="animated-line-container">
@@ -294,14 +292,29 @@
             </div>
             
             <div class="video-grid">
-                <div class="video-circle"><video src="s1.mp4" autoplay muted loop playsinline></video></div>
-                <div class="video-circle"><video src="s2.mp4" autoplay muted loop playsinline></video></div>
-                <div class="video-circle"><video src="s3.mp4" autoplay muted loop playsinline></video></div>
-                <div class="video-circle"><video src="s4.mp4" autoplay muted loop playsinline></video></div>
-                <div class="video-circle"><video src="s5.mp4" autoplay muted loop playsinline></video></div>
+                <div class="video-circle" onclick="showScreen('services-web')">
+                    <video src="s1.mp4" autoplay muted loop playsinline></video>
+                </div>
+                <div class="video-circle" onclick="showScreen('services-design')">
+                    <video src="s2.mp4" autoplay muted loop playsinline></video>
+                </div>
+                <div class="video-circle" onclick="showScreen('services-social')">
+                    <video src="s3.mp4" autoplay muted loop playsinline></video>
+                </div>
+                <div class="video-circle" onclick="showScreen('services-web')">
+                    <video src="s4.mp4" autoplay muted loop playsinline></video>
+                </div>
+                <div class="video-circle" onclick="showScreen('services-design')">
+                    <video src="s5.mp4" autoplay muted loop playsinline></video>
+                </div>
             </div>
+            
+            <p style="margin-top: 25px; font-size: 0.9rem; color: var(--accent-red); font-weight: bold; animation: pulse 2s infinite;">
+                לחץ על שירות להתחלת פרויקט
+            </p>
         </div>
     </div>
+</div>
             </div>
         </div>
     </div>
