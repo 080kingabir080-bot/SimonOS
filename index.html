@@ -185,105 +185,6 @@
                 padding: 20px;
             }
         }    
-/* קונטיינר לבן שמרכז את הכל */
-.services-card {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 40px 20px;
-    margin: 30px auto;
-    max-width: 950px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid #f0f0f0;
-}
-
-/* סידור הכותרת והקו */
-.services-header {
-    text-align: center;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.services-header h3 {
-    font-size: 1.6rem;
-    color: #1a1a1a;
-    margin-bottom: 12px;
-    font-weight: 700;
-}
-
-/* הקו האדום המונפש - משופר */
-.animated-line {
-    width: 100px;
-    height: 4px;
-    background: #e22d2d;
-    border-radius: 10px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-}
-
-/* אפקט תנועה פנימי בתוך הקו */
-.animated-line::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-    animation: lightPass 2.5s ease-in-out infinite;
-}
-
-@keyframes lightPass {
-    0% { left: -100%; }
-    100% { left: 100%; }
-}
-
-/* קרוסלת סרטונים */
-.video-carousel {
-    display: flex;
-    justify-content: flex-start; /* מאפשר גלילה נוחה בטלפון */
-    gap: 25px;
-    margin-top: 20px;
-    width: 100%;
-    overflow-x: auto;
-    padding: 15px 10px;
-    scrollbar-width: none; /* מסתיר פס גלילה ב-Firefox */
-    -ms-overflow-style: none; /* מסתיר פס גלילה ב-IE */
-}
-
-/* מסתיר פס גלילה ב-Chrome/Safari */
-.video-carousel::-webkit-scrollbar { 
-    display: none; 
-}
-
-/* פריט סרטון עגול */
-.video-item {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: 3px solid #e22d2d;
-    padding: 3px; /* רווח בין המסגרת לסרטון */
-    background: white;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    flex-shrink: 0;
-}
-
-.video-item:hover {
-    transform: scale(1.1) translateY(-5px);
-    box-shadow: 0 8px 20px rgba(226, 45, 45, 0.2);
-}
-
-.video-item video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
     </style>
 </head>
 <body>
@@ -311,33 +212,18 @@
             <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 30px;">סוכנות דיגיטל מתקדמת. אנחנו כאן כדי לבנות, לעצב ולנהל את הנוכחות הדיגיטלית שלך בצורה חכמה.</p>
             <div style="display: flex; justify-content: center; gap: 15px;">
                 <button class="btn-primary" onclick="showScreen('services-web')">התחל פרויקט</button>
-               <div class="services-card">
-    <div class="services-header">
-        <h3>השירותים שלנו</h3>
-        <div class="animated-line"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="video-carousel">
-        <div class="video-item" onclick="openFullVideo('video1.mp4')">
-            <video src="video1.mp4" muted autoplay loop playsinline></video>
-        </div>
-        <div class="video-item" onclick="openFullVideo('video2.mp4')">
-            <video src="video2.mp4" muted autoplay loop playsinline></video>
-        </div>
-        <div class="video-item" onclick="openFullVideo('video3.mp4')">
-            <video src="video3.mp4" muted autoplay loop playsinline></video>
-        </div>
-        <div class="video-item" onclick="openFullVideo('video4.mp4')">
-            <video src="video4.mp4" muted autoplay loop playsinline></video>
-        </div>
-        <div class="video-item" onclick="openFullVideo('video5.mp4')">
-            <video src="video5.mp4" muted autoplay loop playsinline></video>
-        </div>
-        <div class="video-item" onclick="openFullVideo('video6.mp4')">
-            <video src="video6.mp4" muted autoplay loop playsinline></video>
-        </div>
-    </div>
-</div>
+    <div id="screen-services-web" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-web" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#f0f4f8"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+
             <h2>בניית אתרים ואפליקציות</h2>
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchFormTab('web', 'website')">בניית אתר</button>
@@ -361,6 +247,14 @@
             </form>
         </div>
     </div>
+
+    <div id="screen-services-design" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-design" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#eef2ff"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
 
             <h2>יצירת פרסומות ולוגו</h2>
             <div class="tabs">
@@ -1212,14 +1106,7 @@
             localStorage.setItem('bs_users', JSON.stringify(users));
             renderAdminUsers();
         }
-function openFullVideo(src) {
-            document.getElementById('fullVideo').src = src;
-            document.getElementById('videoOverlay').style.display = 'flex';
-        }
-        function closeFullVideo() {
-            document.getElementById('fullVideo').pause();
-            document.getElementById('videoOverlay').style.display = 'none';
-        }
+
     </script>
 </body>
 </html>
