@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build Simon - Digital Agency</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fc;
+            --surface-color: #ffffff;
+            --text-main: #1e1e24;
+            --text-muted: #6c757d;
+            --accent-red: #e63946;
+            --accent-red-hover: #d62828;
+            --border-color: #e0e0e0;
+            --success: #2a9d8f;
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* אזור ניהול רקע אתר */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .live-bg-effect {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, rgba(248,249,252,1) 100%);
+        }
+
+        .live-dot {
+            width: 10px; height: 10px; background-color: var(--accent-red);
+            border-radius: 50%; display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(230, 57, 70, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+        }
+
+        /* ניווט */
+        nav { background: var(--surface-color); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;}
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 1.5rem; color: var(--text-main); }
+        .nav-links button { background: none; border: none; font-size: 1rem; margin-left: 15px; cursor: pointer; color: var(--text-main); font-weight: 500;}
+        .nav-links button:hover { color: var(--accent-red); }
+        .btn-primary { background: var(--accent-red); color: white; padding: 10px 20px; border-radius: var(--radius); border: none; cursor: pointer; font-weight: bold; transition: 0.3s;}
+        .btn-primary:hover { background: var(--accent-red-hover); transform: translateY(-2px);}
+        .btn-gold { background: #ffd700; color: #000; padding: 10px 20px; border-radius: var(--radius); border: none; cursor: pointer; font-weight: bold;}
+
+        /* מחלקות כלליות */
+        .hidden { display: none !important; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .card { background: var(--surface-color); border-radius: var(--radius); padding: 30px; box-shadow: var(--shadow); position: relative;}
+        
+        /* אזור טפסים כללי */
+        input, select, textarea {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; background: var(--bg-color); transition: 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-red); outline: none; box-shadow: 0 0 0 3px rgba(230,57,70,0.1); }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: var(--bg-color); border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: var(--accent-red); color: white; }
+
+        /* אזור ניהול יצורים חיים */
+        .creature {
+            position: absolute; top: -40px; right: 20px; width: 60px; height: 60px; z-index: 10;
+        }
+        .creature-body { fill: var(--surface-color); stroke: var(--border-color); stroke-width: 2; rx: 30; }
+        .eye { fill: white; stroke: #333; stroke-width: 1.5; }
+        .pupil { fill: #333; transition: transform 0.1s ease-out; }
+
+        /* מודלים והודעות */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);}
+        .modal-content { background: var(--surface-color); padding: 40px; border-radius: 24px; text-align: center; max-width: 400px; position: relative; box-shadow: var(--shadow); animation: slideUp 0.4s ease;}
+        .close-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);}
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0;} to { transform: translateY(0); opacity: 1;} }
+        
+        .loading-spinner { border: 4px solid var(--border-color); border-top: 4px solid var(--accent-red); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; display: none;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* אזור התחברות והרשמה */
+        .password-strength { height: 6px; border-radius: 3px; background: #eee; margin-top: -10px; margin-bottom: 15px; transition: 0.3s; width: 0%;}
+        .pass-weak { background: var(--accent-red); width: 33%; }
+        .pass-med { background: #ffd166; width: 66%; }
+        .pass-strong { background: var(--success); width: 100%; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .checkbox-group input { width: auto; margin: 0; }
+
+        /* בחירת רשתות חברתיות */
+        .social-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;}
+        .social-opt { padding: 10px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s;}
+        .social-opt.selected { border-color: var(--accent-red); background: rgba(230,57,70,0.05); font-weight: bold;}
+
+        /* אזור שירות לקוחות צ'אט */
+        #chat-widget-btn { position: fixed; bottom: 30px; right: 30px; background: var(--surface-color); border: 2px solid var(--accent-red); color: var(--text-main); width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: var(--shadow); z-index: 999;}
+        #chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: var(--surface-color); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; z-index: 999; overflow: hidden; border: 1px solid var(--border-color);}
+        .chat-header { background: var(--surface-color); padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;}
+        .chat-header-info { display: flex; align-items: center; gap: 10px; }
+        .chat-avatar { width: 40px; height: 40px; background: var(--bg-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 2px solid var(--accent-red);}
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: var(--bg-color); display: flex; flex-direction: column; gap: 10px;}
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; position: relative;}
+        .msg-sig { font-size: 0.7rem; color: #888; margin-bottom: 4px; display: block;}
+        .msg.bot { background: var(--surface-color); border: 1px solid var(--border-color); align-self: flex-start; border-top-right-radius: 2px;}
+        .msg.user { background: var(--accent-red); color: white; align-self: flex-end; border-top-left-radius: 2px;}
+        .msg.user .msg-sig { color: rgba(255,255,255,0.8); }
+        .chat-input { padding: 15px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; background: var(--surface-color);}
+        .chat-input input { margin: 0; }
+        .chat-typing { display: flex; gap: 4px; padding: 10px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-red); animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; } .dot:nth-child(2) { background: #ffd166; animation-delay: -0.16s; } .dot:nth-child(3) { background: var(--success); }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        /* אזור ניהול פאנל ניהול */
+        .admin-layout { display: flex; height: calc(100vh - 70px); background: var(--bg-color);}
+        .admin-sidebar { width: 250px; background: var(--surface-color); border-left: 1px solid var(--border-color); padding: 20px; }
+        .admin-menu-btn { width: 100%; text-align: right; padding: 12px; background: none; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold;}
+        .admin-menu-btn:hover, .admin-menu-btn.active { background: rgba(230,57,70,0.1); color: var(--accent-red); }
+        .admin-content { flex: 1; padding: 30px; overflow-y: auto; }
+        
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .admin-card { background: var(--surface-color); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-color); position: relative;}
+        .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #eee; margin-bottom: 10px;}
+        .tag.high { background: rgba(230,57,70,0.1); color: var(--accent-red); }
+        .locked-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(248,249,252,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: var(--radius); z-index: 10;}
+    </style>
+</head>
+<body>
+    <div class="live-bg-effect"></div>
+
+    <nav>
+        <div class="logo-area">
+            <span class="live-dot"></span>
+            Build Simon
+        </div>
+        <div class="nav-links">
+            <button onclick="showScreen('home')">ראשי</button>
+            <button onclick="showScreen('services-web')">אתרים ואפליקציות</button>
+            <button onclick="showScreen('services-design')">פרסום ולוגו</button>
+            <button onclick="showScreen('services-social')">רשתות חברתיות</button>
+            <button id="nav-login-btn" onclick="showScreen('auth')">התחברות / הרשמה</button>
+            <button id="nav-admin-btn" class="hidden" onclick="showScreen('admin')">פאנל ניהול ⚙️</button>
+            <button id="nav-logout-btn" class="hidden" onclick="logout()">התנתק</button>
+        </div>
+    </nav>
+
+    <div id="screen-home" class="container">
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 20px;">ברוכים הבאים ל-Build Simon</h1>
+            <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 30px;">סוכנות דיגיטל מתקדמת. אנחנו כאן כדי לבנות, לעצב ולנהל את הנוכחות הדיגיטלית שלך בצורה חכמה.</p>
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <button class="btn-primary" onclick="showScreen('services-web')">התחל פרויקט</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-services-web" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-web" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#f0f4f8"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+
+            <h2>בניית אתרים ואפליקציות</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchFormTab('web', 'website')">בניית אתר</button>
+                <button class="tab-btn" onclick="switchFormTab('web', 'app')">בניית אפליקציה</button>
+            </div>
+            <form id="form-web" onsubmit="handleFormSubmit(event, 'web')">
+                <input type="hidden" id="web-type" value="website">
+                <input type="text" id="web-name" placeholder="שם מלא" required maxlength="12">
+                <input type="email" id="web-email" placeholder="דואר אלקטרוני" required maxlength="40">
+                <input type="text" id="web-phone" placeholder="מספר טלפון" required pattern="[0-9]{1,12}">
+                <select id="web-contact-method" required>
+                    <option value="" disabled selected>איך תרצה שניצור קשר?</option>
+                    <option value="call">שיחה טלפונית</option>
+                    <option value="message">הודעה (WhatsApp/SMS)</option>
+                </select>
+                <textarea id="web-notes" placeholder="תרצה להוסיף משהו? (אופציונלי)" rows="3"></textarea>
+                <button type="submit" class="btn-primary" style="width: 100%;">
+                    <span class="loading-spinner" id="spinner-web"></span>
+                    <span id="btn-text-web">שלח בקשה לבניית אתר</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="screen-services-design" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-design" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#eef2ff"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+
+            <h2>יצירת פרסומות ולוגו</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchFormTab('design', 'ad')">יצירת פרסומת</button>
+                <button class="tab-btn" onclick="switchFormTab('design', 'logo')">עיצוב לוגו</button>
+            </div>
+            <form id="form-design" onsubmit="handleFormSubmit(event, 'design')">
+                <input type="hidden" id="design-type" value="ad">
+                <input type="text" id="design-name" placeholder="שם מלא" required maxlength="12">
+                <input type="email" id="design-email" placeholder="דואר אלקטרוני" required maxlength="40">
+                <input type="text" id="design-phone" placeholder="מספר טלפון" required pattern="[0-9]{1,12}">
+                <input type="text" id="design-business" placeholder="מה העסק שלך?" required>
+                <textarea id="design-notes" placeholder="תרצה להוסיף משהו? (אופציונלי)" rows="3"></textarea>
+                <button type="submit" class="btn-primary" style="width: 100%;">
+                    <span class="loading-spinner" id="spinner-design"></span>
+                    <span id="btn-text-design">צור פרסומת</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="screen-services-social" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-social" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#fff5f5"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+
+            <h2>תחזוק רשתות חברתיות</h2>
+            <form id="form-social" onsubmit="handleFormSubmit(event, 'social')">
+                <input type="text" id="social-name" placeholder="שם מלא" required maxlength="12">
+                <input type="email" id="social-email" placeholder="דואר אלקטרוני" required maxlength="40">
+                <input type="text" id="social-phone" placeholder="מספר טלפון" required pattern="[0-9]{1,12}">
+                
+                <p style="margin-bottom: 10px; font-weight: bold;">איזה פרופיל תרצה לתחזק?</p>
+                <div class="social-options">
+                    <div class="social-opt" onclick="selectSocial('facebook')">Facebook</div>
+                    <div class="social-opt" onclick="selectSocial('instagram')">Instagram</div>
+                    <div class="social-opt" onclick="selectSocial('tiktok')">TikTok</div>
+                    <div class="social-opt" onclick="selectSocial('youtube')">YouTube</div>
+                </div>
+                <input type="hidden" id="social-platform" required>
+
+                <textarea id="social-notes" placeholder="תרצה להוסיף משהו? (אופציונלי)" rows="3"></textarea>
+                <button type="submit" class="btn-primary" style="width: 100%;">
+                    <span class="loading-spinner" id="spinner-social"></span>
+                    <span id="btn-text-social">נהל את הפרופיל שלי</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="screen-auth" class="container hidden">
+        <div class="card" style="max-width: 400px; margin: 0 auto;">
+            <svg class="creature" id="creature-auth" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#fdfcf0"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchAuthTab('login')">התחברות</button>
+                <button class="tab-btn" onclick="switchAuthTab('register')">הרשמה</button>
+            </div>
+
+            <form id="form-login" onsubmit="handleLogin(event)">
+                <input type="text" id="login-user" placeholder="שם משתמש (או admin)" required>
+                <input type="password" id="login-pass" placeholder="סיסמה (או admin0)" required>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="login-remember"> <label for="login-remember">זכור את הפרטים שלי</label>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">התחבר</button>
+            </form>
+
+            <form id="form-register" class="hidden" onsubmit="handleRegister(event)">
+                <input type="text" id="reg-name" placeholder="שם מלא" required>
+                <input type="email" id="reg-email" placeholder="דואר אלקטרוני" required>
+                <div style="position: relative;">
+                    <input type="password" id="reg-pass" placeholder="סיסמה (6-12 תווים, כולל באנגלית ומספר)" required oninput="checkPasswordStrength()" minlength="6" maxlength="12">
+                    <button type="button" onclick="togglePassword()" style="position: absolute; left: 10px; top: 12px; background:none; border:none; cursor:pointer;">👁️</button>
+                </div>
+                <div id="pass-meter" class="password-strength"></div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="reg-updates"> <label for="reg-updates">אישור קבלת עדכונים למייל</label>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">הירשם</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="success-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('success-modal')">×</button>
+            <h2 style="margin-bottom: 10px; color: var(--text-main);">הפרטים נשלחו בהצלחה! ✨</h2>
+            <p style="color: var(--text-muted);">המערכת שלנו מתאמת לך פנייה. אנחנו נחזור אליך ברגע שנתפנה.</p>
+            <p style="margin-top: 15px; font-weight: bold;">ראינו את הבקשה שלך ואנחנו אונליין! 👨‍💻</p>
+        </div>
+    </div>
+
+    <button id="chat-widget-btn" onclick="toggleChat()">💬</button>
+    
+    <div id="chat-window" class="hidden">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar">BS</div>
+                <div>
+                    <div style="font-weight: bold;">Build Simon</div>
+                    <div style="font-size: 0.8rem; color: var(--success);">אונליין <span class="live-dot" style="width:6px; height:6px;"></span></div>
+                </div>
+            </div>
+            <button class="close-btn" style="position: static;" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            </div>
+        <div class="chat-input">
+            <input type="text" id="chat-input-field" placeholder="הקלד הודעה..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+            <button class="btn-primary" onclick="sendChatMessage()">שלח</button>
+        </div>
+    </div>
+
+
+    <div id="screen-admin" class="container hidden" style="max-width: 100%; margin: 0; padding: 0;">
+        <div class="admin-layout">
+            <div class="admin-sidebar">
+                <h3 style="margin-bottom: 20px; color: var(--text-main);">פאנל ניהול</h3>
+                <button class="admin-menu-btn active" onclick="switchAdminTab('forms')">אדמין-טפסים 📝</button>
+                <button class="admin-menu-btn" onclick="switchAdminTab('chat')">אדמין-צ'אט 💬</button>
+                <button class="admin-menu-btn" id="admin-users-tab-btn" onclick="switchAdminTab('users')">אדמין-משתמשים 👥</button>
+            </div>
+            <div class="admin-content">
+                
+                <div id="admin-forms" class="admin-section">
+                    <h2>טפסים שהתקבלו</h2>
+                    <div class="tabs" style="margin-top: 20px;">
+                        <button class="tab-btn active" onclick="renderAdminForms('all')">הכל</button>
+                        <button class="tab-btn" onclick="renderAdminForms('web')">אתרים ואפליקציות</button>
+                        <button class="tab-btn" onclick="renderAdminForms('design')">לוגו ופרסומת</button>
+                        <button class="tab-btn" onclick="renderAdminForms('social')">רשתות חברתיות</button>
+                    </div>
+                    <div id="admin-forms-container" class="grid-cards"></div>
+                </div>
+
+                <div id="admin-chat" class="admin-section hidden">
+                    <h2>פניות שירות לקוחות (אונליין)</h2>
+                    <div id="admin-chats-container" class="grid-cards" style="margin-top: 20px;"></div>
+                    
+                    <div id="admin-active-chat" class="card hidden" style="margin-top: 20px; height: 400px; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                            <h3 id="admin-chat-title">צ'אט עם לקוח</h3>
+                            <button class="btn-gold" onclick="closeActiveAdminChat()">סגור פנייה</button>
+                        </div>
+                        <div id="admin-chat-body" class="chat-body" style="border: 1px solid var(--border-color); border-radius: 8px;"></div>
+                        <div class="chat-input" style="padding: 10px 0 0 0;">
+                            <input type="text" id="admin-chat-input" placeholder="הקלט הודעה ללקוח..." onkeypress="if(event.key === 'Enter') sendAdminChatMessage()">
+                            <button class="btn-primary" onclick="sendAdminChatMessage()">שלח תגובה</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin-users" class="admin-section hidden">
+                    <h2>ניהול משתמשים (למנהל בלבד)</h2>
+                    <div id="admin-users-container" class="grid-cards" style="margin-top: 20px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="form-view-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="text-align: right; max-width: 500px;">
+            <button class="close-btn" onclick="closeModal('form-view-modal')">×</button>
+            <h2 id="view-form-title" style="margin-bottom: 15px;">פרטי טופס</h2>
+            <div id="view-form-data" style="background: var(--bg-color); padding: 15px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; margin-bottom: 15px;"></div>
+            <button class="btn-primary" style="background: var(--text-muted);" onclick="deleteForm()">מחק טופס מארכיון</button>
+        </div>
+    </div>
+
+
+    <script>
+        // אתחול נתונים ב-LocalStorage (מסד נתונים וירטואלי)
+        if (!localStorage.getItem('bs_users')) {
+            localStorage.setItem('bs_users', JSON.stringify([
+                { name: 'Admin', email: 'admin@buildsimon.com', user: 'admin', pass: 'admin0', role: 'manager' }
+            ]));
+        }
+        if (!localStorage.getItem('bs_forms')) localStorage.setItem('bs_forms', JSON.stringify([]));
+        if (!localStorage.getItem('bs_chats')) localStorage.setItem('bs_chats', JSON.stringify([]));
+
+        let currentUser = null;
+        let currentChatId = null; // מזהה צאט של משתמש רגיל
+        let adminViewingChatId = null; // מזהה צאט שאדמין פתח
+        let currentViewFormId = null;
+
+        // אזור ניהול יצורים חיים (מעקב עיניים)
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            document.querySelectorAll('.creature').forEach(creature => {
+                if(creature.closest('.hidden') || creature.closest('.hidden *')) return; // אל תחליב אם מוסתר
+                
+                const rect = creature.getBoundingClientRect();
+                const creatureX = rect.left + rect.width / 2;
+                const creatureY = rect.top + rect.height / 2;
+                
+                const angle = Math.atan2(mouseY - creatureY, mouseX - creatureX);
+                const distance = Math.min(4, Math.hypot(mouseX - creatureX, mouseY - creatureY) / 10);
+                
+                const moveX = Math.cos(angle) * distance;
+                const moveY = Math.sin(angle) * distance;
+                
+                creature.querySelectorAll('.pupil').forEach(pupil => {
+                    pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                });
+            });
+        });
+
+        // פונקציות ניווט בסיסיות
+        function showScreen(screenId) {
+            document.querySelectorAll('.container').forEach(c => {
+                if(c.id !== 'chat-window') c.classList.add('hidden');
+            });
+            document.getElementById('screen-' + screenId).classList.remove('hidden');
+            
+            if(screenId === 'admin') {
+                initAdminPanel();
+            }
+        }
+
+        // אזור טפסים שירותים
+        function switchFormTab(section, type) {
+            document.querySelectorAll(`#screen-services-${section} .tab-btn`).forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const btnText = document.getElementById(`btn-text-${section}`);
+            const hiddenType = document.getElementById(`${section}-type`);
+            
+            if(section === 'web') {
+                hiddenType.value = type;
+                btnText.innerText = type === 'website' ? 'שלח בקשה לבניית אתר' : 'שלח בקשה לבניית אפליקציה';
+            } else if (section === 'design') {
+                hiddenType.value = type;
+                btnText.innerText = type === 'ad' ? 'צור פרסומת' : 'עיצוב לוגו';
+            }
+        }
+
+        function selectSocial(platform) {
+            document.querySelectorAll('.social-opt').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('social-platform').value = platform;
+        }
+
+        function handleFormSubmit(e, section) {
+            e.preventDefault();
+            
+            if(section === 'social' && !document.getElementById('social-platform').value) {
+                alert('אנא בחר רשת חברתית אחת לפחות (על ידי לחיצה על המסגרת).');
+                return;
+            }
+
+            // אנימציית טעינה
+            const btnText = document.getElementById(`btn-text-${section}`);
+            const spinner = document.getElementById(`spinner-${section}`);
+            const originalText = btnText.innerText;
+            
+            btnText.innerText = "שולח...";
+            spinner.style.display = "inline-block";
+            
+            setTimeout(() => {
+                // איסוף נתונים
+                let formData = { id: Date.now(), section: section, date: new Date().toLocaleString() };
+                
+                if(section === 'web') {
+                    formData.type = document.getElementById('web-type').value;
+                    formData.name = document.getElementById('web-name').value;
+                    formData.email = document.getElementById('web-email').value;
+                    formData.phone = document.getElementById('web-phone').value;
+                    formData.contact = document.getElementById('web-contact-method').value;
+                    formData.notes = document.getElementById('web-notes').value;
+                } else if (section === 'design') {
+                    formData.type = document.getElementById('design-type').value;
+                    formData.name = document.getElementById('design-name').value;
+                    formData.email = document.getElementById('design-email').value;
+                    formData.phone = document.getElementById('design-phone').value;
+                    formData.business = document.getElementById('design-business').value;
+                    formData.notes = document.getElementById('design-notes').value;
+                } else if (section === 'social') {
+                    formData.name = document.getElementById('social-name').value;
+                    formData.email = document.getElementById('social-email').value;
+                    formData.phone = document.getElementById('social-phone').value;
+                    formData.platform = document.getElementById('social-platform').value;
+                    formData.notes = document.getElementById('social-notes').value;
+                }
+
+                let forms = JSON.parse(localStorage.getItem('bs_forms'));
+                forms.push(formData);
+                localStorage.setItem('bs_forms', JSON.stringify(forms));
+
+                // איפוס והודעה
+                e.target.reset();
+                if(section === 'social') document.querySelectorAll('.social-opt').forEach(el => el.classList.remove('selected'));
+                btnText.innerText = originalText;
+                spinner.style.display = "none";
+                
+                document.getElementById('success-modal').classList.remove('hidden');
+            }, 3000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // אזור התחברות והרשמה
+        function switchAuthTab(tab) {
+            document.querySelectorAll('#screen-auth .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if(tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+            }
+        }
+
+        function checkPasswordStrength() {
+            const pass = document.getElementById('reg-pass').value;
+            const meter = document.getElementById('pass-meter');
+            meter.className = 'password-strength'; // איפוס
+            
+            if(pass.length === 0) { meter.style.width = '0'; return; }
+            
+            let strength = 0;
+            if(pass.length >= 6) strength++;
+            if(/[a-zA-Z]/.test(pass)) strength++;
+            if(/[0-9]/.test(pass)) strength++;
+            
+            if(strength === 1) meter.classList.add('pass-weak');
+            else if(strength === 2) meter.classList.add('pass-med');
+            else if(strength === 3) meter.classList.add('pass-strong');
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('reg-pass');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            
+            // ואלידציה
+            if(!/[a-zA-Z]/.test(pass) || !/[0-9]/.test(pass)) {
+                alert("הסיסמה חייבת לכלול אותיות באנגלית ומספר אחד לפחות");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('bs_users'));
+            if(users.find(u => u.email === email || u.user === name)) {
+                alert("משתמש זה כבר קיים"); return;
+            }
+            
+            users.push({ name: name, email: email, user: name, pass: pass, role: 'user' });
+            localStorage.setItem('bs_users', JSON.stringify(users));
+            
+            // שמירה גם כטופס לארכיון
+            let forms = JSON.parse(localStorage.getItem('bs_forms'));
+            forms.push({ id: Date.now(), section: 'register', name: name, email: email, date: new Date().toLocaleString() });
+            localStorage.setItem('bs_forms', JSON.stringify(forms));
+
+            alert("נרשמת בהצלחה! כעת התחבר.");
+            switchAuthTab('login');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            
+            let users = JSON.parse(localStorage.getItem('bs_users'));
+            let found = users.find(u => (u.user === user || u.email === user) && u.pass === pass);
+            
+            if(found) {
+                currentUser = found;
+                document.getElementById('nav-login-btn').classList.add('hidden');
+                document.getElementById('nav-logout-btn').classList.remove('hidden');
+                
+                if(found.role === 'manager' || found.role === 'agent') {
+                    document.getElementById('nav-admin-btn').classList.remove('hidden');
+                    showScreen('admin');
+                } else {
+                    alert("התחברת בהצלחה לפרופיל האישי.");
+                    showScreen('home');
+                }
+            } else {
+                alert("פרטים שגויים");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('nav-login-btn').classList.remove('hidden');
+            document.getElementById('nav-logout-btn').classList.add('hidden');
+            document.getElementById('nav-admin-btn').classList.add('hidden');
+            showScreen('home');
+        }
+
+
+        // אזור שירות לקוחות צ'אט
+        let chatState = 0; 
+        // 0 = סגור, 1 = נפתח בוט, 2 = ממתין לתשובה קליינט רשום, 3 = נושא, 4 = תיאור, 5 = ממתין לנציג, 6 = מחובר לנציג
+
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.classList.toggle('hidden');
+            
+            if(!win.classList.contains('hidden') && chatState === 0) {
+                startBotFlow();
+            }
+        }
+
+        function appendMessage(sender, text, isBot = false, customSig = null) {
+            const body = document.getElementById('chat-body');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg ${sender}`;
+            
+            let sigText = customSig;
+            if(!sigText) {
+                if(sender === 'bot') sigText = "Build Simon (System)";
+                else if(sender === 'agent') sigText = "Build Simon";
+                else sigText = `${currentUser ? currentUser.name : 'אורח'} (you)`;
+            }
+
+            msgDiv.innerHTML = `<span class="msg-sig">${sigText}</span>${text}`;
+            body.appendChild(msgDiv);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function showTyping() {
+            const body = document.getElementById('chat-body');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = "msg bot typing-indicator";
+            typingDiv.id = "typing-indicator";
+            typingDiv.innerHTML = `<span class="msg-sig">Build Simon</span><div class="chat-typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            body.appendChild(typingDiv);
+            body.scrollTop = body.scrollHeight;
+        }
+        function hideTyping() {
+            const el = document.getElementById('typing-indicator');
+            if(el) el.remove();
+        }
+
+        function startBotFlow() {
+            chatState = 1;
+            
+            // יצירת מזהה שיחה במסד נתונים וירטואלי
+            currentChatId = Date.now().toString();
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            chats.push({
+                id: currentChatId,
+                status: 'bot_flow', // 'bot_flow', 'waiting_agent', 'active', 'closed'
+                isRegistered: false,
+                urgency: 0,
+                topic: '',
+                description: '',
+                messages: []
+            });
+            localStorage.setItem('bs_chats', JSON.stringify(chats));
+
+            showTyping();
+            setTimeout(() => {
+                hideTyping();
+                appendMessage('bot', "שלום! אני הצ'אט האוטומטי. אשאל אותך כמה שאלות קצרות כדי להעביר את הפנייה שלך לנציג אנושי בצורה הטובה ביותר.");
+                
+                setTimeout(() => {
+                    showTyping();
+                    setTimeout(() => {
+                        hideTyping();
+                        appendMessage('bot', "האם אתה לקוח רשום באתר שלנו? (כן/לא)");
+                        chatState = 2;
+                    }, 800);
+                }, 1000);
+            }, 1000);
+        }
+
+        function saveMessageToDb(chatId, sender, text) {
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            let chat = chats.find(c => c.id === chatId);
+            if(chat) {
+                chat.messages.push({sender, text, time: new Date().getTime()});
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input-field');
+            const text = input.value.trim();
+            if(!text) return;
+
+            appendMessage('user', text);
+            input.value = '';
+            
+            if(currentChatId) saveMessageToDb(currentChatId, 'user', text);
+
+            // לוגיקה של הבוט לפי שלב
+            if(chatState === 2) {
+                let isYes = /כן|ככן|כןן|גן/i.test(text);
+                let isNo = /לא|ללא|לר/i.test(text);
+                
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                let chat = chats.find(c => c.id === currentChatId);
+                if(isYes) { chat.isRegistered = true; chat.urgency = 2; }
+                else { chat.isRegistered = false; chat.urgency = 1; }
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+
+                chatState = 3;
+                showTyping();
+                setTimeout(() => {
+                    hideTyping();
+                    appendMessage('bot', "באיזה נושא תרצה עזרה? (בניית אתר/אפליקציה, פרסומת/לוגו, רשתות חברתיות, או אחר)");
+                }, 800);
+            } 
+            else if (chatState === 3) {
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                let chat = chats.find(c => c.id === currentChatId);
+                chat.topic = text;
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+
+                chatState = 4;
+                showTyping();
+                setTimeout(() => {
+                    hideTyping();
+                    appendMessage('bot', "שאלה אחרונה: ספר לי מה בדיוק הבעיה?");
+                }, 800);
+            }
+            else if (chatState === 4) {
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                let chat = chats.find(c => c.id === currentChatId);
+                chat.description = text;
+                chat.status = 'waiting_agent';
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+
+                chatState = 5;
+                const shortDesc = text.length > 20 ? text.substring(0,20) + "..." : text;
+                
+                showTyping();
+                setTimeout(() => {
+                    hideTyping();
+                    appendMessage('bot', `תודה! הפנייה בנושא: "${shortDesc}" התקבלה.`);
+                    
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.className = "msg bot";
+                    loadingDiv.id = "agent-loading";
+                    loadingDiv.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div class="loading-spinner" style="display:block; width:16px; height:16px;"></div> נציג מתחבר 👨‍💼</div>`;
+                    document.getElementById('chat-body').appendChild(loadingDiv);
+                    
+                    // מתחיל להאזין לחיבור נציג
+                    checkAgentConnection();
+                }, 1000);
+            }
+        }
+
+        let agentCheckInterval;
+        function checkAgentConnection() {
+            agentCheckInterval = setInterval(() => {
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                let chat = chats.find(c => c.id === currentChatId);
+                
+                if(chat && chat.status === 'active') {
+                    // נציג התחבר!
+                    clearInterval(agentCheckInterval);
+                    chatState = 6;
+                    
+                    const loader = document.getElementById('agent-loading');
+                    if(loader) loader.remove();
+                    
+                    appendMessage('bot', "נציג מחובר.", true, "מערכת");
+                    
+                    // משיכת הודעות חדשות מהנציג
+                    listenForNewMessages();
+                }
+            }, 1000);
+        }
+
+        function listenForNewMessages() {
+            let lastMessageCount = 0;
+            setInterval(() => {
+                if(chatState !== 6 || !currentChatId) return;
+                
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                let chat = chats.find(c => c.id === currentChatId);
+                
+                if(chat && chat.messages.length > lastMessageCount) {
+                    // הוסף רק הודעות של agent שלא הוצגו
+                    for(let i = lastMessageCount; i < chat.messages.length; i++) {
+                        if(chat.messages[i].sender === 'agent') {
+                            appendMessage('agent', chat.messages[i].text);
+                        }
+                    }
+                    lastMessageCount = chat.messages.length;
+                }
+                
+                if(chat && chat.status === 'closed') {
+                    appendMessage('bot', "הפנייה נסגרה על ידי הנציג.", true, "מערכת");
+                    chatState = 0;
+                    currentChatId = null;
+                }
+            }, 1000);
+        }
+
+        // אזור ניהול פאנל ניהול
+        function initAdminPanel() {
+            if(!currentUser || (currentUser.role !== 'manager' && currentUser.role !== 'agent')) {
+                alert("אין הרשאה");
+                showScreen('home');
+                return;
+            }
+            
+            if(currentUser.role === 'agent') {
+                document.getElementById('admin-users-tab-btn').classList.add('hidden');
+            } else {
+                document.getElementById('admin-users-tab-btn').classList.remove('hidden');
+            }
+            
+            switchAdminTab('forms');
+        }
+
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.admin-menu-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`admin-${tab}`).classList.remove('hidden');
+            event.target.classList.add('active');
+            
+            if(tab === 'forms') renderAdminForms('all');
+            if(tab === 'chat') renderAdminChats();
+            if(tab === 'users') renderAdminUsers();
+        }
+
+        // אזור ניהול אדמין-טפסים
+        function renderAdminForms(filter) {
+            const container = document.getElementById('admin-forms-container');
+            container.innerHTML = '';
+            
+            let forms = JSON.parse(localStorage.getItem('bs_forms'));
+            
+            // הפוך את הסדר (חדש למעלה)
+            forms.reverse().forEach(form => {
+                if(filter !== 'all' && form.section !== filter) return;
+                
+                let title = form.section === 'register' ? 'הרשמת משתמש' : 
+                            form.section === 'web' ? 'אתר/אפליקציה' : 
+                            form.section === 'design' ? 'לוגו/פרסומת' : 'רשתות חברתיות';
+                
+                container.innerHTML += `
+                    <div class="admin-card" style="cursor:pointer;" onclick="openFormView(${form.id})">
+                        <div class="tag">${title}</div>
+                        <h4>${form.name || 'ללא שם'}</h4>
+                        <p style="font-size:0.9rem; color:var(--text-muted);">${form.date}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function openFormView(id) {
+            let forms = JSON.parse(localStorage.getItem('bs_forms'));
+            let form = forms.find(f => f.id === id);
+            if(!form) return;
+            
+            currentViewFormId = id;
+            document.getElementById('view-form-title').innerText = `טופס מספר: ${id}`;
+            
+            let dataStr = "";
+            for(let key in form) {
+                if(key !== 'id') dataStr += `${key}: ${form[key]}\n`;
+            }
+            
+            document.getElementById('view-form-data').innerText = dataStr;
+            document.getElementById('form-view-modal').classList.remove('hidden');
+        }
+
+        function deleteForm() {
+            if(!currentUser || currentUser.role !== 'manager') {
+                alert("למנהל בלבד"); return;
+            }
+            
+            let forms = JSON.parse(localStorage.getItem('bs_forms'));
+            forms = forms.filter(f => f.id !== currentViewFormId);
+            localStorage.setItem('bs_forms', JSON.stringify(forms));
+            
+            closeModal('form-view-modal');
+            renderAdminForms('all');
+        }
+
+        // אזור ניהול אדמין-צ'אט
+        let adminChatRefreshInterval;
+
+        function renderAdminChats() {
+            const container = document.getElementById('admin-chats-container');
+            
+            const loadChats = () => {
+                let chats = JSON.parse(localStorage.getItem('bs_chats'));
+                container.innerHTML = '';
+                
+                chats.forEach(chat => {
+                    if(chat.status === 'closed') return;
+                    
+                    const isLocked = chat.status === 'bot_flow';
+                    const urgClass = chat.urgency === 2 ? 'tag high' : 'tag';
+                    
+                    container.innerHTML += `
+                        <div class="admin-card" onclick="${isLocked ? '' : `openAdminChat('${chat.id}')`}" style="${isLocked ? 'cursor:not-allowed;' : 'cursor:pointer; border-color:var(--accent-red);'}">
+                            ${isLocked ? `<div class="locked-overlay">🔒 הצאט בתהליך... <div class="loading-spinner" style="display:block; margin-top:10px;"></div></div>` : ''}
+                            <div class="${urgClass}">${chat.isRegistered ? 'לקוח רשום' : 'אורח'}</div>
+                            <h4>נושא: ${chat.topic || 'ממתין...'}</h4>
+                            <p style="font-size:0.9rem; margin-top:5px;">תיוג: ${chat.topic}</p>
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">${chat.description ? chat.description.substring(0,30)+'...' : ''}</p>
+                        </div>
+                    `;
+                });
+            };
+            
+            loadChats();
+            clearInterval(adminChatRefreshInterval);
+            adminChatRefreshInterval = setInterval(loadChats, 2000); // רענון אוטומטי
+        }
+
+        function openAdminChat(id) {
+            adminViewingChatId = id;
+            document.getElementById('admin-active-chat').classList.remove('hidden');
+            document.getElementById('admin-chat-title').innerText = `צ'אט פעיל (מזהה: ${id})`;
+            
+            // שנה סטטוס ל-active כדי לשחרר את הלקוח מ"ממתין לנציג"
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            let chat = chats.find(c => c.id === id);
+            if(chat && chat.status === 'waiting_agent') {
+                chat.status = 'active';
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+            }
+            
+            refreshAdminChatBody();
+            setInterval(refreshAdminChatBody, 1000); // מאזין להודעות משתמש
+        }
+
+        function refreshAdminChatBody() {
+            if(!adminViewingChatId) return;
+            const body = document.getElementById('admin-chat-body');
+            
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            let chat = chats.find(c => c.id === adminViewingChatId);
+            
+            if(!chat) return;
+            
+            body.innerHTML = '';
+            // הצג קודם נתוני מערכת
+            body.innerHTML += `<div class="msg bot" style="background:#f0f0f0;"><span class="msg-sig">מערכת</span>נושא: ${chat.topic}<br>תיאור: ${chat.description}</div>`;
+            
+            chat.messages.forEach(m => {
+                const isAgent = m.sender === 'agent';
+                body.innerHTML += `
+                    <div class="msg ${isAgent ? 'user' : 'bot'}" style="${isAgent ? 'background:var(--accent-red); color:white;' : ''}">
+                        <span class="msg-sig">${isAgent ? 'אתה (נציג)' : 'לקוח'}</span>
+                        ${m.text}
+                    </div>
+                `;
+            });
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function sendAdminChatMessage() {
+            const input = document.getElementById('admin-chat-input');
+            const text = input.value.trim();
+            if(!text || !adminViewingChatId) return;
+            
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            let chat = chats.find(c => c.id === adminViewingChatId);
+            
+            if(chat) {
+                chat.messages.push({sender: 'agent', text: text, time: new Date().getTime()});
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+            }
+            
+            input.value = '';
+            refreshAdminChatBody();
+        }
+
+        function closeActiveAdminChat() {
+            if(!adminViewingChatId) return;
+            
+            let chats = JSON.parse(localStorage.getItem('bs_chats'));
+            let chat = chats.find(c => c.id === adminViewingChatId);
+            if(chat) {
+                chat.status = 'closed';
+                localStorage.setItem('bs_chats', JSON.stringify(chats));
+            }
+            
+            document.getElementById('admin-active-chat').classList.add('hidden');
+            adminViewingChatId = null;
+            renderAdminChats();
+        }
+
+        // אזור ניהול משתמשים
+        function renderAdminUsers() {
+            const container = document.getElementById('admin-users-container');
+            container.innerHTML = '';
+            
+            let users = JSON.parse(localStorage.getItem('bs_users'));
+            
+            users.forEach((u, index) => {
+                const roleText = u.role === 'manager' ? 'מנהל' : u.role === 'agent' ? 'נציג' : 'לקוח רגיל';
+                container.innerHTML += `
+                    <div class="admin-card">
+                        <div class="tag ${u.role !== 'user' ? 'high' : ''}">${roleText}</div>
+                        <h4>${u.name}</h4>
+                        <p style="font-size:0.9rem;">משתמש: ${u.user}</p>
+                        <p style="font-size:0.9rem;">מייל: ${u.email}</p>
+                        <p style="font-size:0.9rem;">סיסמה: ${u.pass}</p>
+                        <div style="margin-top: 15px; display:flex; gap:10px;">
+                            <select onchange="updateUserRole('${u.user}', this.value)" style="padding:5px; margin:0;">
+                                <option value="user" ${u.role === 'user' ? 'selected' : ''}>לקוח</option>
+                                <option value="agent" ${u.role === 'agent' ? 'selected' : ''}>נציג</option>
+                                <option value="manager" ${u.role === 'manager' ? 'selected' : ''}>מנהל</option>
+                            </select>
+                            <button class="btn-primary" style="background:#333; padding:5px 10px;" onclick="deleteUser('${u.user}')">מחק</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateUserRole(username, newRole) {
+            let users = JSON.parse(localStorage.getItem('bs_users'));
+            let user = users.find(u => u.user === username);
+            if(user) {
+                user.role = newRole;
+                localStorage.setItem('bs_users', JSON.stringify(users));
+                alert("תפקיד עודכן");
+            }
+        }
+
+        function deleteUser(username) {
+            if(username === 'admin') { alert("לא ניתן למחוק את אדמין הראשי"); return; }
+            let users = JSON.parse(localStorage.getItem('bs_users'));
+            users = users.filter(u => u.user !== username);
+            localStorage.setItem('bs_users', JSON.stringify(users));
+            renderAdminUsers();
+        }
+
+    </script>
+</body>
+</html>
