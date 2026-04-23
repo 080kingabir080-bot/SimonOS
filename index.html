@@ -185,38 +185,49 @@
                 padding: 20px;
             }
         }    
-    /* קרוסלת סרטונים */
+/* סידור הכותרת והקו */
+        .services-header {
+            margin-top: 50px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .services-header h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        /* הקו האדום המונפש */
+        .animated-line {
+            width: 0;
+            height: 4px;
+            background-color: #e22d2d;
+            border-radius: 10px;
+            animation: lineExpand 3s ease-in-out infinite;
+        }
+
+        @keyframes lineExpand {
+            0% { width: 0; opacity: 0; }
+            50% { width: 150px; opacity: 1; }
+            100% { width: 0; opacity: 0; }
+        }
+
+        /* תיקון לקרוסלה שתהיה מתחת */
         .video-carousel {
             display: flex;
             justify-content: center;
             gap: 20px;
-            margin-top: 30px;
+            margin-top: 25px;
+            width: 100%; /* מבטיח תפיסת רוחב מלאה */
             overflow-x: auto;
             padding: 10px;
-            scrollbar-width: none; /* מסתיר פס גלילה */
+            scrollbar-width: none;
         }
+        
         .video-carousel::-webkit-scrollbar { display: none; }
-
-        .video-item {
-            width: 75px; height: 75px;
-            border-radius: 50%;
-            border: 2px solid #e22d2d;
-            overflow: hidden; cursor: pointer;
-            flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .video-item video { width: 100%; height: 100%; object-fit: cover; }
-
-        .video-overlay {
-            display: none; position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 10000;
-            justify-content: center; align-items: center;
-        }
-        .video-overlay video { max-width: 90%; max-height: 80vh; border-radius: 10px; }
-        .close-video {
-            position: absolute; top: 20px; right: 30px;
-            color: white; font-size: 40px; cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -244,7 +255,12 @@
             <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 30px;">סוכנות דיגיטל מתקדמת. אנחנו כאן כדי לבנות, לעצב ולנהל את הנוכחות הדיגיטלית שלך בצורה חכמה.</p>
             <div style="display: flex; justify-content: center; gap: 15px;">
                 <button class="btn-primary" onclick="showScreen('services-web')">התחל פרויקט</button>
-                <div class="video-carousel">
+               <div class="services-header">
+            <h3>השירותים שלנו</h3>
+            <div class="animated-line"></div>
+        </div>
+
+        <div class="video-carousel">
             <div class="video-item" onclick="openFullVideo('video1.mp4')">
                 <video src="video1.mp4" muted autoplay loop playsinline></video>
             </div>
@@ -254,6 +270,11 @@
             <div class="video-item" onclick="openFullVideo('video3.mp4')">
                 <video src="video3.mp4" muted autoplay loop playsinline></video>
             </div>
+        </div>
+
+        <div id="videoOverlay" class="video-overlay">
+            <span class="close-video" onclick="closeFullVideo()">&times;</span>
+            <video id="fullVideo" controls autoplay loop></video>
         </div>
 
         <div id="videoOverlay" class="video-overlay">
