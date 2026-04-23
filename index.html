@@ -133,6 +133,58 @@
         .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #eee; margin-bottom: 10px;}
         .tag.high { background: rgba(230,57,70,0.1); color: var(--accent-red); }
         .locked-overlay { position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(248,249,252,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: var(--radius); z-index: 10;}
+/* התאמה לטלפונים חכמים - רספונסיביות */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 5px;
+            }
+
+            .nav-links button {
+                margin: 5px;
+                font-size: 0.9rem;
+            }
+
+            .grid-cards {
+                grid-template-columns: 1fr; /* כרטיס אחד בשורה */
+            }
+
+            .admin-layout {
+                flex-direction: column; /* תפריט אדמין עובר למעלה */
+                height: auto;
+            }
+
+            .admin-sidebar {
+                width: 100%;
+                border-left: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            #chat-window {
+                width: 90%;
+                right: 5%;
+                left: 5%;
+                bottom: 80px;
+                height: 70vh;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }    
     </style>
 </head>
 <body>
