@@ -72,58 +72,23 @@
         .tab-btn { flex: 1; padding: 10px; border: none; background: var(--bg-color); border-radius: 8px; cursor: pointer; font-weight: bold; }
         .tab-btn.active { background: var(--accent-red); color: white; }
 
-       /* עיצוב היצור המשודרג - חי יותר */
-.creature {
-    position: absolute;
-    top: -55px;
-    right: 20px;
-    width: 75px;
-    height: 75px;
-    z-index: 10;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.08));
-}
+        /* אזור ניהול יצורים חיים */
+        .creature {
+            position: absolute; top: -40px; right: 20px; width: 60px; height: 60px; z-index: 10;
+        }
+        .creature-body { fill: var(--surface-color); stroke: var(--border-color); stroke-width: 2; rx: 30; }
+        .eye { fill: white; stroke: #333; stroke-width: 1.5; }
+        .pupil { fill: #333; transition: transform 0.1s ease-out; }
 
-/* אנימציית נשימה לגוף */
-.creature-body {
-    fill: #ffffff;
-    stroke: var(--accent-red);
-    stroke-width: 2.5;
-    rx: 25;
-    animation: breathing 4s ease-in-out infinite;
-    transform-origin: center;
-}
+        /* מודלים והודעות */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);}
+        .modal-content { background: var(--surface-color); padding: 40px; border-radius: 24px; text-align: center; max-width: 400px; position: relative; box-shadow: var(--shadow); animation: slideUp 0.4s ease;}
+        .close-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);}
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0;} to { transform: translateY(0); opacity: 1;} }
+        
+        .loading-spinner { border: 4px solid var(--border-color); border-top: 4px solid var(--accent-red); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; display: none;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-@keyframes breathing {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.04) translateY(-2px); }
-}
-
-.eye-white {
-    fill: white;
-    stroke: #333;
-    stroke-width: 1.2;
-}
-
-.pupil {
-    fill: #1a1a1a;
-    transition: transform 0.1s ease-out;
-}
-
-/* עפעפיים למצמוץ */
-.eyelid {
-    fill: var(--accent-red);
-    transition: height 0.1s;
-}
-
-/* קלאס שמופעל ע"י JS */
-.blink-act {
-    animation: blink-anim 0.25s ease-in-out forwards;
-}
-
-@keyframes blink-anim {
-    0%, 100% { height: 0%; }
-    45%, 55% { height: 110%; } /* סגירה מלאה */
-}
         /* אזור התחברות והרשמה */
         .password-strength { height: 6px; border-radius: 3px; background: #eee; margin-top: -10px; margin-bottom: 15px; transition: 0.3s; width: 0%;}
         .pass-weak { background: var(--accent-red); width: 33%; }
@@ -355,19 +320,12 @@
     </div>
 
     <div id="screen-services-web" class="container hidden">
-        <svg class="creature" id="creature-web" viewBox="0 0 100 100">
-    <rect class="creature-body" x="10" y="20" width="80" height="70" />
-    <g transform="translate(35, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-    <g transform="translate(65, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-</svg>
+        <div class="card">
+            <svg class="creature" id="creature-web" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#f0f4f8"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
 
             <h2>בניית אתרים ואפליקציות</h2>
             <div class="tabs">
@@ -393,18 +351,14 @@
         </div>
     </div>
 
-   <svg class="creature" id="creature-design" viewBox="0 0 100 100">
-    <rect class="creature-body" x="10" y="20" width="80" height="70" style="fill: #eef2ff;" /> <g transform="translate(35, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-    <g transform="translate(65, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-</svg>
+    <div id="screen-services-design" class="container hidden">
+        <div class="card">
+            <svg class="creature" id="creature-design" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#eef2ff"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
+
             <h2>יצירת פרסומות ולוגו</h2>
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchFormTab('design', 'ad')">יצירת פרסומת</button>
@@ -426,19 +380,12 @@
     </div>
 
     <div id="screen-services-social" class="container hidden">
-    <svg class="creature" id="creature-social" viewBox="0 0 100 100">
-    <rect class="creature-body" x="10" y="20" width="80" height="70" style="fill: #fff5f5;" />
-    <g transform="translate(35, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-    <g transform="translate(65, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-</svg>
+        <div class="card">
+            <svg class="creature" id="creature-social" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#fff5f5"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
 
             <h2>תחזוק רשתות חברתיות</h2>
             <form id="form-social" onsubmit="handleFormSubmit(event, 'social')">
@@ -465,19 +412,12 @@
     </div>
 
     <div id="screen-auth" class="container hidden">
-<svg class="creature" id="creature-auth" viewBox="0 0 100 100">
-    <rect class="creature-body" x="10" y="20" width="80" height="70" style="fill: #fdfcf0;" />
-    <g transform="translate(35, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-    <g transform="translate(65, 50)">
-        <circle class="eye-white" r="12" />
-        <circle class="pupil" r="5" />
-        <rect class="eyelid" x="-12" y="-12" width="24" height="0" rx="2" />
-    </g>
-</svg>
+        <div class="card" style="max-width: 400px; margin: 0 auto;">
+            <svg class="creature" id="creature-auth" viewBox="0 0 100 100">
+                <rect class="creature-body" x="10" y="20" width="80" height="80" fill="#fdfcf0"/>
+                <circle class="eye" cx="35" cy="50" r="10"/><circle class="pupil p-left" cx="35" cy="50" r="4"/>
+                <circle class="eye" cx="65" cy="50" r="10"/><circle class="pupil p-right" cx="65" cy="50" r="4"/>
+            </svg>
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchAuthTab('login')">התחברות</button>
                 <button class="tab-btn" onclick="switchAuthTab('register')">הרשמה</button>
